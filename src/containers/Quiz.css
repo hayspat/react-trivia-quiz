@@ -1,0 +1,35 @@
+.choices {
+  display: flex;
+  flex-flow: column nowrap;
+  max-width: 50%;
+  margin: auto;
+  padding: 10px;
+}
+
+.item {
+  margin: 10px;
+}
+
+.feedback {
+  padding: 20px;
+}
+
+.topbar {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+  padding: 20px 0 20px 0;
+  background-color: #9c27b0;
+  background-clip: padding-box;
+  background-origin: padding-box;
+}
+
+.quiz-container {
+  width: 50%;
+  border: 3px solid #9c27b0;
+  border-radius: 10px;
+}
+
+.question {
+  padding: 15px;
+}
