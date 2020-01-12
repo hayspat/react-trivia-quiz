@@ -3,6 +3,7 @@ import axios from "axios";
 import Button from "../components/Button";
 import Feedback from "../components/Feedback";
 import "./Quiz.css";
+import { AllHtmlEntities } from "html-entities";
 
 interface IQuizReponse {
   response_code: number;
@@ -35,7 +36,7 @@ const Quiz = (props: PropTypes) => {
     "question" | "wrong" | "success" | "timeout"
   >("question");
 
-  // To not start countdown before async request finishes
+  // Prevent starting countdown before async request finishes
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,8 +44,17 @@ const Quiz = (props: PropTypes) => {
       const questions = await axios.get<IQuizReponse>(
         `https://opentdb.com/api.php?amount=10&category=${props.category}&difficulty=${props.difficulty}&type=multiple`
       );
+
+      console.log(
+        `https://opentdb.com/api.php?amount=10&category=${props.category}&difficulty=${props.difficulty}&type=multiple`
+      );
       setQuestions(questions.data.results);
-      setLoading(false);
+
+      // Workaround for categories not working currently.
+      // Eg Science: Gadgets, Comics, Art, Politics, Math, Musicals & Theatres categories return empty array as response if  difficulty level is selected other than any
+      // I'm not going to filter out these categories because they might fix in the future.
+
+      if (questions.data.results.length > 0) setLoading(false);
     })();
   }, [props.category, props.difficulty]);
 
@@ -53,7 +63,7 @@ const Quiz = (props: PropTypes) => {
       var countDown = setTimeout(() => {
         setTimer(timer - 1);
       }, 1000);
-    } else if (timer === 0 && !loading) {
+    } else if (timer === 0 && !loading && whatPageToShow === "question") {
       setWhatPageToShow("timeout");
     }
     return () => clearTimeout(countDown);
@@ -87,10 +97,18 @@ const Quiz = (props: PropTypes) => {
 
   const handleCorrectAnswer = () => {
     setWhatPageToShow("success");
+
+    // Earned points = remaining time * 10
     setPoints(points + timer * 10);
   };
   const handleWrongAnswer = () => {
     setWhatPageToShow("wrong");
+  };
+
+  // Decode special HTML characters sent by OTDB API
+  const decodeHTML = (encodedString: string) => {
+    const entities = new AllHtmlEntities();
+    return entities.decode(encodedString);
   };
 
   let questionEl = () => {
@@ -108,7 +126,7 @@ const Quiz = (props: PropTypes) => {
               ? handleCorrectAnswer
               : handleWrongAnswer
           }
-          text={`${answer}`}
+          text={decodeHTML(answer)}
         />
       ));
 
@@ -116,13 +134,13 @@ const Quiz = (props: PropTypes) => {
         // Disable first two incorrect answers
         let jokerEl = question.incorrect_answers.map((answer, index) => {
           if (index < 2) {
-            return <Button key={index} disabled text={`${answer}`} />;
+            return <Button key={index} disabled text={decodeHTML(answer)} />;
           } else {
             return (
               <Button
                 key={index}
                 onClick={handleWrongAnswer}
-                text={`${answer}`}
+                text={decodeHTML(answer)}
               />
             );
           }
@@ -132,7 +150,7 @@ const Quiz = (props: PropTypes) => {
           <Button
             key={question.correct_answer}
             onClick={handleCorrectAnswer}
-            text={`${question.correct_answer}`}
+            text={decodeHTML(question.correct_answer)}
           />
         );
 
@@ -147,7 +165,7 @@ const Quiz = (props: PropTypes) => {
 
       return (
         <div className="question-container">
-          <div className="question">{question.question}</div>
+          <div className="question">{decodeHTML(question.question)}</div>
           <div className="choices">
             {isJokerUsed.used && step === isJokerUsed.step
               ? jokerFn()
@@ -167,7 +185,7 @@ const Quiz = (props: PropTypes) => {
             <div>Remaining Time: {timer}</div>
           ) : null}
         </div>
-        {renderElement() ?? "loading..."}
+        {renderElement() ?? "Loading..."}
       </div>
       {whatPageToShow === "question" && !isJokerUsed.used && !loading ? (
         <div>

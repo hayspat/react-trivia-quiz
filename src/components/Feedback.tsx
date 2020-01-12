@@ -9,9 +9,15 @@ type PropTypes = {
   earnedPoints?: number;
 };
 
-const Feedback = (props: PropTypes) => {
+const Feedback = ({
+  points,
+  gameOver,
+  onClick,
+  page,
+  earnedPoints
+}: PropTypes) => {
   const getSvg = () => {
-    if (props.page === "success") {
+    if (page === "success") {
       return (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -23,7 +29,7 @@ const Feedback = (props: PropTypes) => {
           <path d="M20.285 2l-11.285 11.567-5.286-5.011-3.714 3.716 9 8.728 15-15.285z" />
         </svg>
       );
-    } else if (props.page === "wrong") {
+    } else if (page === "wrong") {
       return (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -35,7 +41,7 @@ const Feedback = (props: PropTypes) => {
           <path d="M23.954 21.03l-9.184-9.095 9.092-9.174-2.832-2.807-9.09 9.179-9.176-9.088-2.81 2.81 9.186 9.105-9.095 9.184 2.81 2.81 9.112-9.192 9.18 9.1z" />
         </svg>
       );
-    } else if (props.page === "timeout") {
+    } else if (page === "timeout") {
       return (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -53,18 +59,16 @@ const Feedback = (props: PropTypes) => {
   return (
     <div className="feedback">
       {getSvg()}
-      <p>{props.page.toUpperCase()}</p>
-      {props.gameOver ? <p>GAME OVER</p> : null}
+      <p>{page.toUpperCase()}</p>
+      {gameOver ? <p>GAME OVER</p> : null}
       <p>
-        You have earned {props.page === "success" ? props.earnedPoints : "no"}{" "}
+        You have earned {page === "success" ? earnedPoints : "no "}
         points
       </p>
-      <p>Total: {props.points}</p>
+      <p>Total: {points}</p>
       <Button
-        text={props.gameOver ? "Play Again" : "Next Question"}
-        onClick={
-          props.gameOver ? () => window.location.reload() : props.onClick
-        }
+        text={gameOver ? "Play Again" : "Next Question"}
+        onClick={gameOver ? () => window.location.reload() : onClick}
       />
     </div>
   );

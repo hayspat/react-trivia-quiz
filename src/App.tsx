@@ -21,12 +21,17 @@ const App: React.FC = () => {
       const categories = await Axios.get(
         "https://opentdb.com/api_category.php"
       );
-      setCategories(categories.data.trivia_categories);
+      setCategories([
+        { id: "", name: "Any" },
+        ...categories.data.trivia_categories
+      ]);
     })();
   }, []);
 
   const jsxCategories = categories.map(el => (
-    <option value={el.id}>{el.name}</option>
+    <option key={el.id} value={el.id}>
+      {el.name}
+    </option>
   ));
 
   return (
@@ -43,6 +48,7 @@ const App: React.FC = () => {
           <div className="app-container">
             <label htmlFor="difficulty">Choose a difficulty</label>
             <select className="select-css" id="difficulty" ref={difficultyRef}>
+              <option value="">Any</option>
               <option value="easy">Easy</option>
               <option value="medium">Medium</option>
               <option value="hard">Hard</option>
@@ -53,7 +59,7 @@ const App: React.FC = () => {
                 {jsxCategories}
               </select>
             ) : (
-              "loading..."
+              "Loading..."
             )}
 
             {categories[0] ? (
